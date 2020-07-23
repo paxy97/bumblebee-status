@@ -109,9 +109,18 @@ class Module(core.module.Module):
         )
         spotify_iface = dbus.Interface(spotify, "org.freedesktop.DBus.Properties")
         props = spotify_iface.Get("org.mpris.MediaPlayer2.Player", "Metadata")
+        title_prop = str(props.get("xesam:title"))
+        try:
+            title, info = title_prop.rsplit('-', 1)
+        except ValueError:
+            title = title_prop
+        else:
+            if "remaster" not in info.lower():
+                title = "-".join([title, info])
+
         self.__song = self.__format.format(
             album=str(props.get("xesam:album")),
-            title=str(props.get("xesam:title")),
+            title=title,
             artist=",".join(props.get("xesam:artist")),
             trackNumber=str(props.get("xesam:trackNumber")),
         )
